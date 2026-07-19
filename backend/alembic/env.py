@@ -6,7 +6,11 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.core.config import settings
-from app.core.database import Base
+
+# Importing app.models (rather than just app.core.database.Base) is what
+# actually registers every model on Base.metadata -- without this import the
+# model modules never execute and Alembic sees an empty schema.
+from app.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,7 +24,6 @@ if config.config_file_name is not None:
 # Use the application's DATABASE_URL instead of the static value in alembic.ini.
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
-# Import model modules here so they register on Base.metadata for autogenerate.
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
