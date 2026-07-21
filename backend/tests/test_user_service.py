@@ -7,7 +7,12 @@ from sqlalchemy.orm import Session
 from app.core.security import verify_password
 from app.models.user import User
 from app.schemas.auth import RegisterRequest
-from app.services.user_service import EmailAlreadyRegisteredError, register_user
+from app.schemas.user import UserResponse
+from app.services.user_service import (
+    EmailAlreadyRegisteredError,
+    get_current_user_profile,
+    register_user,
+)
 
 
 class _FakeDriverError:
@@ -116,3 +121,19 @@ def test_register_user_reraises_unrelated_integrity_error(
 
     with pytest.raises(IntegrityError):
         register_user(db_session, _register_request())
+
+
+def test_get_current_user_profile_returns_a_user_response(test_user: User):
+    profile = get_current_user_profile(test_user)
+
+    assert isinstance(profile, UserResponse)
+    assert profile.id == test_user.id
+    assert profile.email == test_user.email
+    assert profile.first_name == test_user.first_name
+    assert profile.last_name == test_user.last_name
+
+
+def test_get_current_user_profile_never_returns_password_hash(test_user: User):
+    profile = get_current_user_profile(test_user)
+
+    assert "password_hash" not in profile.model_dump()
