@@ -20,8 +20,8 @@ from app.core.security import decode_access_token
 from app.models.user import User
 from app.schemas.auth import TokenPayload
 
-# tokenUrl is only used to populate the OpenAPI/Swagger "Authorize" flow; no
-# route is registered at this path yet.
+# tokenUrl points at the real POST /api/v1/auth/login (app.api.auth.login),
+# populating the OpenAPI/Swagger "Authorize" flow.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login")
 
 

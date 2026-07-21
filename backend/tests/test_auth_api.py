@@ -1,13 +1,15 @@
-"""Tests for POST /api/v1/auth/register (app.api.auth)."""
+"""Tests for POST /api/v1/auth/register and POST /api/v1/auth/login (app.api.auth)."""
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import verify_password
+from app.core.security import decode_access_token, verify_password
 from app.models.user import User
+from tests.conftest import TEST_USER_PASSWORD
 
 REGISTER_URL = f"{settings.API_V1_PREFIX}/auth/register"
+LOGIN_URL = f"{settings.API_V1_PREFIX}/auth/login"
 
 
 def _payload(**overrides) -> dict:
@@ -110,3 +112,78 @@ def test_register_rejects_missing_required_fields(client: TestClient):
     response = client.post(REGISTER_URL, json={"email": "missing.fields@example.com"})
 
     assert response.status_code == 422
+
+
+def test_login_succeeds_with_correct_credentials(client: TestClient, test_user: User):
+    response = client.post(
+        LOGIN_URL, json={"email": test_user.email, "password": TEST_USER_PASSWORD}
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["token_type"] == "bearer"
+    claims = decode_access_token(body["access_token"])
+    assert claims["sub"] == str(test_user.id)
+
+
+def test_login_normalizes_email_before_matching(client: TestClient, test_user: User):
+    response = client.post(
+        LOGIN_URL,
+        json={"email": f"  {test_user.email.upper()}  ", "password": TEST_USER_PASSWORD},
+    )
+
+    assert response.status_code == 200
+
+
+def test_login_rejects_an_unknown_email(client: TestClient):
+    response = client.post(
+        LOGIN_URL, json={"email": "nobody@example.com", "password": "whatever123"}
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid email or password"
+
+
+def test_login_rejects_a_wrong_password(client: TestClient, test_user: User):
+    response = client.post(
+        LOGIN_URL, json={"email": test_user.email, "password": "wrong-password"}
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid email or password"
+
+
+def test_login_unknown_email_and_wrong_password_return_the_identical_response(
+    client: TestClient, test_user: User
+):
+    # The whole point of the generic message: an unknown email and a known
+    # email with the wrong password must be indistinguishable to the caller.
+    unknown_response = client.post(
+        LOGIN_URL, json={"email": "nobody@example.com", "password": "whatever123"}
+    )
+    wrong_password_response = client.post(
+        LOGIN_URL, json={"email": test_user.email, "password": "wrong-password"}
+    )
+
+    assert unknown_response.status_code == wrong_password_response.status_code == 401
+    assert unknown_response.json() == wrong_password_response.json()
+
+
+def test_login_rejects_an_invalid_email_format(client: TestClient):
+    response = client.post(LOGIN_URL, json={"email": "not-an-email", "password": "whatever123"})
+
+    assert response.status_code == 422
+
+
+def test_login_rejects_missing_fields(client: TestClient):
+    response = client.post(LOGIN_URL, json={"email": "someone@example.com"})
+
+    assert response.status_code == 422
+
+
+def test_login_never_returns_password_hash(client: TestClient, test_user: User):
+    response = client.post(
+        LOGIN_URL, json={"email": test_user.email, "password": TEST_USER_PASSWORD}
+    )
+
+    assert "password_hash" not in response.json()
