@@ -2,12 +2,11 @@
 
 `Token`/`TokenPayload` describe the shape of a JWT access token and its
 decoded claims; they are consumed by `app.core.security` (encode/decode),
-`app.services.auth_service`, and `app.api.deps` -- no route currently
-returns `Token` directly, since no login endpoint exists yet, but it is the
-schema such an endpoint would use.
+`app.services.auth_service`, and `app.api.deps`.
 
-`RegisterRequest` is the request body for `POST /api/v1/auth/register`
-(see `app.api.auth`).
+`RegisterRequest` is the request body for `POST /api/v1/auth/register`;
+`LoginRequest` is the request body for `POST /api/v1/auth/login` (see
+`app.api.auth`).
 """
 
 import re
@@ -23,6 +22,16 @@ _HAS_LETTER = re.compile(r"[A-Za-z]")
 _HAS_DIGIT = re.compile(r"\d")
 
 
+def _normalize_email(value: str) -> str:
+    """Trim and lowercase an email so `a@b.com` and `A@B.com` collide.
+
+    Shared by `RegisterRequest` (where it's enforced against at write time
+    by `app.services.user_service.register_user`) and `LoginRequest` (where
+    it's compared against at read time by `app.services.auth_service.login_user`).
+    """
+    return value.strip().lower()
+
+
 class RegisterRequest(BaseModel):
     """Request body for registering a new account."""
 
@@ -35,12 +44,7 @@ class RegisterRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def normalize_email(cls, value: str) -> str:
-        """Trim and lowercase the email so `a@b.com` and `A@B.com` collide.
-
-        Uniqueness is enforced against this normalized form, both here and
-        in `app.services.user_service.register_user`.
-        """
-        return value.strip().lower()
+        return _normalize_email(value)
 
     @field_validator("password")
     @classmethod
@@ -64,8 +68,26 @@ class RegisterRequest(BaseModel):
         return stripped
 
 
+class LoginRequest(BaseModel):
+    """Request body for logging in with an email/password pair.
+
+    Unlike `RegisterRequest.password`, `password` here carries no strength
+    validation -- this is a credential check against an already-created
+    account, not account creation, so an existing weak/legacy password must
+    still be able to log in.
+    """
+
+    email: EmailStr
+    password: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return _normalize_email(value)
+
+
 class Token(BaseModel):
-    """Shape of an issued access token, as would be returned by a future login endpoint."""
+    """Shape of an issued access token, returned by `POST /api/v1/auth/login`."""
 
     access_token: str
     token_type: str = "bearer"
