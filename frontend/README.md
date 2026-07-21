@@ -1,8 +1,20 @@
 # Frontend
 
-Next.js (App Router, TypeScript) frontend for the fashion e-commerce platform.
+Next.js (App Router, TypeScript, Tailwind CSS) frontend for the fashion e-commerce platform.
 
 See the [root README](../README.md) for full setup instructions.
+
+## Structure
+
+- `app/` — routes, layouts, pages
+- `components/` — shared UI components
+- `lib/` — helpers such as the API client (`lib/api.ts`)
+- `types/` — shared TypeScript types
+- `styles/` — global CSS (`styles/globals.css`, imported by `app/layout.tsx`)
+
+## Environment
+
+- `NEXT_PUBLIC_API_URL` — base URL of the backend API (see `.env.example`)
 
 ## Development
 

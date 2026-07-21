@@ -1,8 +1,7 @@
 export default function Home() {
   return (
-    <main>
-      <h1>Fashion E-Commerce</h1>
-      <p>Frontend project setup complete.</p>
+    <main className="flex min-h-screen flex-1 items-center justify-center">
+      <h1 className="text-2xl font-semibold">Fashion E-Commerce</h1>
     </main>
   );
 }
