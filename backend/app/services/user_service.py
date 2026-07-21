@@ -1,8 +1,8 @@
 """User account service layer.
 
-Currently holds registration only. Sits between the `auth` routes and the
-`User` model/`app.core.security`, the same layering `auth_service.py` uses
-for authentication.
+Holds registration and profile retrieval. Sits between the `auth`/`users`
+routes and the `User` model/`app.core.security`, the same layering
+`auth_service.py` uses for authentication.
 """
 
 from sqlalchemy import select
@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password
 from app.models.user import User
 from app.schemas.auth import RegisterRequest
+from app.schemas.user import UserResponse
 
 # Postgres's default auto-generated name for the unnamed `UniqueConstraint('email')`
 # on `users` (see the initial Alembic migration and docs/database-schema.md, 5.1)
@@ -71,3 +72,13 @@ def register_user(db: Session, data: RegisterRequest) -> User:
         raise
     db.refresh(user)
     return user
+
+
+def get_current_user_profile(user: User) -> UserResponse:
+    """Build the safe, public-facing representation of the authenticated user.
+
+    `user` is already resolved by `app.api.deps.get_current_active_user`; this just
+    keeps the `User` -> `UserResponse` projection (never `password_hash`) in
+    the service layer rather than the route.
+    """
+    return UserResponse.model_validate(user)
