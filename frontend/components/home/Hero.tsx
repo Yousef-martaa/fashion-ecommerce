@@ -27,7 +27,7 @@ export function Hero() {
         </p>
         <Link
           href="#"
-          className="inline-flex w-fit items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-medium text-cream transition-colors hover:bg-ink-soft"
+          className="inline-flex w-fit items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-medium text-cream transition-colors hover:bg-ink-soft hover:text-cream focus-visible:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream active:bg-ink-soft active:text-cream"
         >
           تسوقي الأن
         </Link>
