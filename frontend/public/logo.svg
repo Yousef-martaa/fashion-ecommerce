@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 420" role="img" aria-labelledby="title desc">
+  <title id="title">Sajda horizontal logo</title>
+  <desc id="desc">Horizontal Sajda logo for website headers.</desc>
+  <g transform="translate(55,28) scale(.58)" fill="none" stroke="#A9824A" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M210 410V210C210 130 300 72 400 28C500 72 590 130 590 210V410" stroke-width="16"/>
+    <path d="M325 175C280 225 285 300 345 355C405 410 430 475 395 535C365 585 300 598 260 560C220 522 228 455 278 415" stroke-width="18"/>
+    <path d="M360 155C325 208 338 260 395 318C455 378 485 438 458 500" stroke-width="18"/>
+    <path d="M405 142C385 195 405 235 462 292C520 350 540 400 520 455" stroke-width="18"/>
+    <path d="M500 170l12 26 28 12-28 12-12 27-12-27-28-12 28-12z" fill="#A9824A" stroke="none"/>
+  </g>
+  <text x="805" y="185" text-anchor="middle" fill="#A9824A" font-size="112"
+        font-family="Noto Naskh Arabic, Amiri, serif" direction="rtl" unicode-bidi="bidi-override">سجدة</text>
+  <text x="815" y="285" text-anchor="middle" fill="#A9824A" font-size="68"
+        font-family="Cormorant Garamond, Georgia, serif" letter-spacing="22">SAJDA</text>
+</svg>
