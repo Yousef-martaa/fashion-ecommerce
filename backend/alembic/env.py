@@ -22,7 +22,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Use the application's DATABASE_URL instead of the static value in alembic.ini.
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# alembic.ini is parsed with configparser, which treats "%" as the start of an
+# interpolation sequence -- percent-encoded URL characters (e.g. "%40" for "@")
+# must have their "%" doubled to "%%" so configparser stores/reads them literally.
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 target_metadata = Base.metadata
 
